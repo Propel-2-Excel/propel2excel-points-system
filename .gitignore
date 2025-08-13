@@ -1,0 +1,6 @@
+.env
+bot.log
+__pycache__/
+*.pyc
+p2e.db
+cogs/__pycache__/
