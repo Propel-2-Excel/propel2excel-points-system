@@ -62,7 +62,7 @@ class Points(commands.Cog):
             )
             embed.add_field(
                 name="🔗 Form Link",
-                value="[Resume Review Form](https://forms.gle/YOUR_FORM_ID)",
+                value="[Resume Review Form](https://forms.gle/EKHLrqhHwt1bGQjd6)",
                 inline=False
             )
             embed.add_field(

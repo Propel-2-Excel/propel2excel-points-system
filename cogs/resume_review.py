@@ -10,7 +10,7 @@ class ResumeReview(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.client = P2EClient()
-        self.form_url = "https://forms.gle/YOUR_FORM_ID"  # Replace with actual form URL
+        self.form_url = "https://forms.gle/EKHLrqhHwt1bGQjd6"  # Resume review form
 
     @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)  # 30 second cooldown
