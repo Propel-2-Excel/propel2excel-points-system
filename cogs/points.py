@@ -72,7 +72,7 @@ class Points(commands.Cog):
             )
             embed.add_field(
                 name="📧 Contact",
-                value="Email: reviews@propel2excel.com",
+                value="Email: propel@propel2excel.com",
                 inline=True
             )
             embed.add_field(
