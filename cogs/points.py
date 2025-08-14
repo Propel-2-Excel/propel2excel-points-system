@@ -16,24 +16,11 @@ class Points(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
-        if message.content.startswith('!'):
-            return
-
-        message_id = f"{message.id}_{message.author.id}"
-        if message_id in self.processed_messages:
-            return
-        self.processed_messages.add(message_id)
-        if len(self.processed_messages) > 2000:
-            self.processed_messages.clear()
-
-        await with_retries(lambda: self.client.add_activity(str(message.author.id), "discord_activity", "Message sent"))
+        
+        # Only process commands, don't award points for regular messages
         await self.bot.process_commands(message)
 
-    @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
-        if user.bot:
-            return
-        await with_retries(lambda: self.client.add_activity(str(user.id), "like_interaction", "Reaction added"))
+    # Removed automatic reaction points - users only get points from specific commands
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
@@ -58,41 +45,60 @@ class Points(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def resume(self, ctx: commands.Context):
-        """Accept resume only if a valid file is attached; then record activity."""
-        # Check for an attachment in the same message
-        attachments = getattr(ctx.message, "attachments", []) or []
-        if not attachments:
-            return await ctx.send(
-                "❌ Please attach your resume file to the same message as `!resume`.\n"
-                "Accepted formats: PDF, DOC, DOCX, TXT."
+        """Start resume review process - sends DM with form link and instructions"""
+        try:
+            # Create rich embed for resume review request
+            embed = discord.Embed(
+                title="📋 Resume Review Request",
+                description="I'll help you get a professional resume review!",
+                color=0x0099ff
             )
-
-        # Validate file type by extension (fallback if content_type is missing)
-        valid_exts = (".pdf", ".doc", ".docx", ".txt")
-        chosen = None
-        for att in attachments:
-            name = (att.filename or "").lower()
-            if any(name.endswith(ext) for ext in valid_exts):
-                chosen = att
-                break
-
-        if not chosen:
-            return await ctx.send(
-                "❌ Invalid file format. Accepted formats: PDF, DOC, DOCX, TXT."
+            embed.add_field(
+                name="📝 What You'll Need", 
+                value="• Your resume (PDF format)\n• Target industry/role\n• Your availability\n• Contact information",
+                inline=False
             )
-
-        # Record the activity with filename in details for audit trail
-        details = f"Resume upload: {chosen.filename}"
-        await with_retries(lambda: self.client.add_activity(str(ctx.author.id), "resume_upload", details))
-        embed = discord.Embed(
-            title="📄 Resume Received",
-            description=f"{ctx.author.mention}, your resume was received and validated. Points will be awarded by the backend.",
-            color=0x00ff00,
-        )
-        embed.add_field(name="File", value=chosen.filename, inline=True)
-        await ctx.send(embed=embed)
+            embed.add_field(
+                name="🔗 Form Link",
+                value="[Resume Review Form](https://forms.gle/YOUR_FORM_ID)",
+                inline=False
+            )
+            embed.add_field(
+                name="⏰ Sessions",
+                value="30-minute slots between 9 AM - 5 PM",
+                inline=True
+            )
+            embed.add_field(
+                name="📧 Contact",
+                value="Email: reviews@propel2excel.com",
+                inline=True
+            )
+            embed.add_field(
+                name="💡 Tips for Great Matches",
+                value="• Be specific about your target role\n• Choose multiple time slots\n• Have your resume ready as PDF\n• Include relevant experience",
+                inline=False
+            )
+            embed.add_field(
+                name="🔄 Next Steps",
+                value="1. Fill out the form\n2. Upload your resume\n3. Select your availability\n4. Wait for professional match\n5. Receive calendar invite",
+                inline=False
+            )
+            
+            # Send DM to user
+            await ctx.author.send(embed=embed)
+            
+            # Confirm in channel
+            await ctx.send(f"✅ {ctx.author.mention} Check your DMs for the resume review form! I've sent you all the details to get started.")
+            
+            # Record the activity
+            await with_retries(lambda: self.client.add_activity(str(ctx.author.id), "resume_review_request", "Resume review process started"))
+            
+        except discord.Forbidden:
+            await ctx.send("❌ I can't send you a DM. Please enable DMs from server members and try again.")
+        except Exception as e:
+            await ctx.send(f"❌ Error: {e}")
 
     @commands.command()
     @commands.cooldown(1, 60, commands.BucketType.user)

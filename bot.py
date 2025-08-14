@@ -501,7 +501,7 @@ async def help(ctx):
             value="`!points` - Check your points\n"
                   "`!pointshistory` - View your point history\n"
                   "`!pointvalues` - Show all ways to earn points\n"
-                  "`!resume` - Claim points for resume upload\n"
+                  "`!resume` - Start resume review process\n"
                   "`!event` - Claim points for event attendance\n"
                   "`!resource` - Claim points for sharing resources\n"
                   "`!linkedin` - Claim points for LinkedIn updates",
@@ -530,11 +530,15 @@ async def help(ctx):
         embed.add_field(
             name="🔧 Utility Commands",
             value="`!ping` - Test bot response\n"
-                  "`!test` - Test database connection\n"
+                  "`!test` - Test backend connection\n"
                   "`!status` - Show bot status\n"
+                  "`!link <code>` - Link your website account\n"
+                  "`!activitylog [hours] [limit]` - Recent activities\n"
                   "`!help` - Show this help message",
             inline=False
         )
+        
+
         
         embed.set_footer(text="Use ! before each command. Example: !points")
         
